@@ -54,11 +54,13 @@ Requires Node.js 20.19 or newer. Node.js 22 is the version in `.nvmrc`. Node.js 
 
 ```bash
 cp .env.example .env
-npm install
+npm ci
 npm run dev
 ```
 
-`npm run dev` runs a preflight (Node version), `prisma migrate deploy`, then `next dev`. If Next exits before it prints Ready, the wrapper exits 1 and prints the last log. Default `DATABASE_URL` is `file:./prisma/dev.db` from the repo root, so the database file is `prisma/dev.db`. Open [http://localhost:3000](http://localhost:3000).
+Use `npm ci`, not `npm install`. `next` is pinned to **15.5.29** (exact). Nextra 4.5.1's peer range is `next: >=14`, which includes Next 16, and `npx next` with no local bind installs `next@latest` (16 today). The lockfile and `overrides` keep 15.5.29. `npm run dev` runs the local `node_modules/next` binary, never `npx next`.
+
+`npm run dev` runs a preflight (Node version and pinned Next version), `prisma migrate deploy`, then `next dev`. If Next 16 is present, the launcher passes `--webpack` because Nextra injects a webpack config and Next 16 defaults to Turbopack. Next 15.5.29 does not accept `--webpack`; webpack is already the default. If Next exits before it prints Ready, the wrapper exits 1 and prints the last log. Default `DATABASE_URL` is `file:./prisma/dev.db` from the repo root, so the database file is `prisma/dev.db`. Open [http://localhost:3000](http://localhost:3000).
 
 Pick a display name in the comments panel. Select article text to leave an inline comment.
 

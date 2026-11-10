@@ -1,14 +1,15 @@
 import { spawn } from 'node:child_process'
 import process from 'node:process'
 import { assertSupportedNode } from './preflight.mjs'
+import { localBin, nextCli } from './local-cli.mjs'
 
 assertSupportedNode()
 
 process.env.DATABASE_URL ??= 'file:./prisma/dev.db'
 
-function run(command, args, { inherit = false } = {}) {
+function runNode(bin, args, { inherit = false } = {}) {
   return new Promise((resolve, reject) => {
-    const child = spawn(command, args, {
+    const child = spawn(process.execPath, [bin, ...args], {
       stdio: inherit ? 'inherit' : ['ignore', 'pipe', 'pipe'],
       env: process.env
     })
@@ -19,7 +20,7 @@ function run(command, args, { inherit = false } = {}) {
     child.on('error', reject)
     child.on('exit', (code, signal) => {
       if (signal) {
-        reject(new Error(`${command} ${args.join(' ')} killed by ${signal}`))
+        reject(new Error(`${bin} killed by ${signal}`))
         return
       }
       resolve(code ?? 1)
@@ -27,14 +28,15 @@ function run(command, args, { inherit = false } = {}) {
   })
 }
 
-const migrateCode = await run('npx', ['prisma', 'migrate', 'deploy'], { inherit: true })
+const prisma = localBin('prisma')
+const migrateCode = await runNode(prisma.bin, ['migrate', 'deploy'], { inherit: true })
 if (migrateCode !== 0) {
   console.error(`[nextra-comments] prisma migrate deploy exited ${migrateCode}`)
   process.exit(migrateCode)
 }
 
-const nextArgs = ['next', 'dev', ...process.argv.slice(2)]
-const child = spawn('npx', nextArgs, {
+const { bin, bundlerFlags } = nextCli()
+const child = spawn(process.execPath, [bin, 'dev', ...bundlerFlags, ...process.argv.slice(2)], {
   stdio: ['ignore', 'pipe', 'pipe'],
   env: process.env
 })

@@ -7,7 +7,7 @@ const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'nextra-comments-'))
 const databaseUrl = `file:${path.join(dir, 'test.db')}`
 process.env.DATABASE_URL = databaseUrl
 
-execSync('npx prisma db push', {
+execSync('npx --no-install prisma db push', {
   stdio: 'pipe',
   env: { ...process.env, DATABASE_URL: databaseUrl }
 })

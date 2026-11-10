@@ -19,7 +19,8 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: npm
       - run: npm ci
-      - run: npx prisma generate
+      - run: npm exec --no -- prisma generate
+      - run: node -e "const v=require('next/package.json').version; if (v !== '15.5.29') { console.error('expected next@15.5.29, got', v); process.exit(1) }"
       - run: npm test
         env:
           DATABASE_URL: file:./prisma/ci.db
@@ -27,3 +28,17 @@ jobs:
         env:
           DATABASE_URL: file:./prisma/ci.db
           PORT: 3015
+
+  npm-install-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+      - run: npm install
+      - run: node -e "const v=require('next/package.json').version; if (v !== '15.5.29') { console.error('expected next@15.5.29, got', v); process.exit(1) }"
+      - run: npm run smoke
+        env:
+          DATABASE_URL: file:./prisma/ci.db
+          PORT: 3016

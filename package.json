@@ -4,8 +4,8 @@
   "scripts": {
     "preflight": "node scripts/preflight.mjs",
     "dev": "node scripts/dev.mjs",
-    "build": "node scripts/preflight.mjs && DATABASE_URL=${DATABASE_URL:-file:./prisma/dev.db} prisma migrate deploy && DATABASE_URL=${DATABASE_URL:-file:./prisma/dev.db} next build",
-    "start": "next start",
+    "build": "node scripts/preflight.mjs && DATABASE_URL=${DATABASE_URL:-file:./prisma/dev.db} prisma migrate deploy && DATABASE_URL=${DATABASE_URL:-file:./prisma/dev.db} node scripts/run-next.mjs build",
+    "start": "node scripts/run-next.mjs start",
     "test": "vitest run",
     "test:watch": "vitest",
     "postinstall": "prisma generate",
@@ -16,14 +16,17 @@
   "engines": {
     "node": ">=20.19.0"
   },
+  "overrides": {
+    "next": "15.5.29"
+  },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "7.10.1",
     "@prisma/client": "7.10.1",
     "better-sqlite3": "^12.6.0",
     "dotenv": "^16.6.1",
-    "next": "^15.5.29",
-    "nextra": "^4.5.1",
-    "nextra-theme-docs": "^4.5.1",
+    "next": "15.5.29",
+    "nextra": "4.5.1",
+    "nextra-theme-docs": "4.5.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
