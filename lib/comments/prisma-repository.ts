@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@prisma/client'
+import type { PrismaClient } from '@/generated/prisma/client'
 import type { CommentRepository } from './repository'
 import type { Anchor, Comment, NewComment, User } from './types'
 

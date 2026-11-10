@@ -2,20 +2,25 @@
   "name": "nextra-comments-poc",
   "private": true,
   "scripts": {
-    "dev": "DATABASE_URL=${DATABASE_URL:-file:./dev.db} prisma migrate deploy && DATABASE_URL=${DATABASE_URL:-file:./dev.db} next dev",
-    "build": "DATABASE_URL=${DATABASE_URL:-file:./dev.db} prisma migrate deploy && DATABASE_URL=${DATABASE_URL:-file:./dev.db} next build",
+    "preflight": "node scripts/preflight.mjs",
+    "dev": "node scripts/dev.mjs",
+    "build": "node scripts/preflight.mjs && DATABASE_URL=${DATABASE_URL:-file:./prisma/dev.db} prisma migrate deploy && DATABASE_URL=${DATABASE_URL:-file:./prisma/dev.db} next build",
     "start": "next start",
     "test": "vitest run",
     "test:watch": "vitest",
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate dev",
-    "db:deploy": "prisma migrate deploy"
+    "db:deploy": "prisma migrate deploy",
+    "smoke": "node scripts/smoke.mjs"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=20.19.0"
   },
   "dependencies": {
-    "@prisma/client": "^6.6.0",
+    "@prisma/adapter-better-sqlite3": "7.10.1",
+    "@prisma/client": "7.10.1",
+    "better-sqlite3": "^12.6.0",
+    "dotenv": "^16.6.1",
     "next": "^15.5.29",
     "nextra": "^4.5.1",
     "nextra-theme-docs": "^4.5.1",
@@ -23,10 +28,11 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "prisma": "^6.6.0",
+    "prisma": "7.10.1",
     "typescript": "^5.8.2",
     "vitest": "^3.1.1"
   }

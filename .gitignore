@@ -3,6 +3,7 @@ node_modules/
 out/
 dist/
 coverage/
+generated/prisma
 *.tsbuildinfo
 .env
 prisma/dev.db

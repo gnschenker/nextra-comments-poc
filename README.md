@@ -50,7 +50,7 @@ Delete-own is enforced in `CommentService.deleteOwn`. The server compares `comme
 
 ## Run locally
 
-Requires Node.js 20 or newer.
+Requires Node.js 20.19 or newer. Node.js 22 is the version in `.nvmrc`. Node.js 26 is in CI.
 
 ```bash
 cp .env.example .env
@@ -58,15 +58,31 @@ npm install
 npm run dev
 ```
 
-`npm run dev` runs `prisma migrate deploy` and then `next dev`. Prisma resolves `file:./dev.db` relative to `prisma/schema.prisma`, so the database file is `prisma/dev.db`. Open [http://localhost:3000](http://localhost:3000).
+`npm run dev` runs a preflight (Node version), `prisma migrate deploy`, then `next dev`. If Next exits before it prints Ready, the wrapper exits 1 and prints the last log. Default `DATABASE_URL` is `file:./prisma/dev.db` from the repo root, so the database file is `prisma/dev.db`. Open [http://localhost:3000](http://localhost:3000).
 
 Pick a display name in the comments panel. Select article text to leave an inline comment.
 
 ```bash
 npm test
+npm run smoke
 ```
 
-Tests cover quote re-attachment and the HTTP API, including a rejected delete of someone else's comment.
+Tests cover quote re-attachment and the HTTP API, including a rejected delete of someone else's comment. `npm run smoke` starts the dev server and waits until `GET /` and `GET /api/comments?page=/deploy` return HTTP 200.
+
+## Prisma 8 / Prisma ORM 7
+
+`prisma@latest` is Prisma 8 (release candidate). There is no `@prisma/client@8`. Prisma 8's SQLite package is experimental `@prisma/orm-sqlite`, and the Prisma 8 CLI has no `generate` or `migrate deploy`.
+
+The official upgrade table for a Prisma 6 app that is not on MongoDB, when staying on the generated client, is [Upgrade to Prisma ORM 7](https://www.prisma.io/docs/orm/more/upgrade-guides/upgrading-versions/upgrading-to-prisma-7). This repo follows that guide:
+
+- `prisma` and `@prisma/client` are pinned at **7.10.1** (current `@prisma/client`).
+- Generator is `prisma-client` with required `output = "../generated/prisma"`.
+- CLI config lives in `prisma.config.ts` (schema path, migrations path, `DATABASE_URL`). Datasource URL is no longer in `schema.prisma`.
+- Runtime uses the **driver adapter** `@prisma/adapter-better-sqlite3` (Rust-free client). That removes the Prisma 6 query engine binary.
+- `prisma generate` is explicit (`postinstall` and CI). `db push` / `migrate` no longer take `--skip-generate`.
+- `migrate deploy` still applies `prisma/migrations`.
+
+Application code outside `lib/comments/prisma-repository.ts` and `lib/db.ts` still does not import Prisma. `CommentRepository` is unchanged.
 
 ## Wire OIDC or Entra ID SSO
 
@@ -85,7 +101,8 @@ Do not read the display name from the client on mutating routes. The API already
 
 1. In `prisma/schema.prisma`, set `datasource.db.provider` to `postgresql`.
 2. Set `DATABASE_URL` to a Postgres URL.
-3. Run `npx prisma migrate dev` to emit a Postgres migration. Do not reuse the SQLite migration files.
-4. Keep `CommentRepository` as the boundary. The Prisma adapter is the file that should change if you later move storage into a separate service.
+3. Install `@prisma/adapter-pg` and `pg` at the same Prisma 7 version, then change `lib/db.ts` to construct `PrismaClient` with `new PrismaPg({ connectionString: url })` instead of `PrismaBetterSqlite3`.
+4. Run `npx prisma migrate dev` to emit a Postgres migration. Do not reuse the SQLite migration files.
+5. Keep `CommentRepository` as the boundary. The Prisma adapter is the file that should change if you later move storage into a separate service.
 
 No application code outside `lib/comments/prisma-repository.ts` and `lib/db.ts` should import Prisma.
