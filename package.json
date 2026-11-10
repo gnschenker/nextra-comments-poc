@@ -1,0 +1,33 @@
+{
+  "name": "nextra-comments-poc",
+  "private": true,
+  "scripts": {
+    "dev": "DATABASE_URL=${DATABASE_URL:-file:./dev.db} prisma migrate deploy && DATABASE_URL=${DATABASE_URL:-file:./dev.db} next dev",
+    "build": "DATABASE_URL=${DATABASE_URL:-file:./dev.db} prisma migrate deploy && DATABASE_URL=${DATABASE_URL:-file:./dev.db} next build",
+    "start": "next start",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "postinstall": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.6.0",
+    "next": "^15.5.29",
+    "nextra": "^4.5.1",
+    "nextra-theme-docs": "^4.5.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "prisma": "^6.6.0",
+    "typescript": "^5.8.2",
+    "vitest": "^3.1.1"
+  }
+}

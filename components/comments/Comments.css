@@ -1,0 +1,174 @@
+.nc-panel {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--nextra-border, rgba(127, 127, 127, 0.25));
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+.nc-panel h2.nc-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.15rem;
+}
+
+.nc-identity {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.nc-identity input,
+.nc-thread textarea,
+.nc-composer textarea {
+  border: 1px solid var(--nextra-border, rgba(127, 127, 127, 0.35));
+  border-radius: 0.4rem;
+  padding: 0.4rem 0.55rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.nc-composer textarea,
+.nc-thread textarea {
+  width: 100%;
+  min-height: 4.5rem;
+  resize: vertical;
+}
+
+.nc-btn {
+  border: 0;
+  border-radius: 0.4rem;
+  padding: 0.35rem 0.7rem;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  background: #2563eb;
+  color: #fff;
+}
+
+.nc-btn.secondary {
+  background: transparent;
+  color: inherit;
+  border: 1px solid var(--nextra-border, rgba(127, 127, 127, 0.35));
+}
+
+.nc-btn.danger {
+  background: transparent;
+  color: #b91c1c;
+  border: 1px solid rgba(185, 28, 28, 0.35);
+}
+
+.nc-section {
+  margin-top: 1.25rem;
+}
+
+.nc-section h3 {
+  margin: 0 0 0.6rem;
+  font-size: 0.95rem;
+}
+
+.nc-thread {
+  border: 1px solid var(--nextra-border, rgba(127, 127, 127, 0.25));
+  border-radius: 0.6rem;
+  padding: 0.85rem;
+  margin-bottom: 0.75rem;
+  background: rgba(127, 127, 127, 0.04);
+}
+
+.nc-thread.resolved {
+  opacity: 0.72;
+}
+
+.nc-thread.active {
+  outline: 2px solid #2563eb;
+}
+
+.nc-quote {
+  margin: 0 0 0.65rem;
+  padding: 0.4rem 0.6rem;
+  border-left: 3px solid #f59e0b;
+  background: rgba(245, 158, 11, 0.12);
+  font-size: 0.9rem;
+}
+
+.nc-comment {
+  margin-bottom: 0.7rem;
+}
+
+.nc-comment.reply {
+  margin-left: 1rem;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--nextra-border, rgba(127, 127, 127, 0.25));
+}
+
+.nc-meta {
+  font-size: 0.78rem;
+  opacity: 0.75;
+  margin-bottom: 0.2rem;
+}
+
+.nc-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.nc-toolbar {
+  position: fixed;
+  z-index: 40;
+  transform: translate(-50%, -120%);
+}
+
+.nc-overlays {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.nc-hl {
+  position: absolute;
+  background: rgba(250, 204, 21, 0.45);
+  border-radius: 2px;
+}
+
+.nc-hl.resolved {
+  background: rgba(148, 163, 184, 0.35);
+}
+
+.nc-marker {
+  position: absolute;
+  pointer-events: auto;
+  width: 1.1rem;
+  height: 1.1rem;
+  border: 0;
+  border-radius: 999px;
+  background: #d97706;
+  color: #fff;
+  font-size: 0.7rem;
+  line-height: 1.1rem;
+  padding: 0;
+  cursor: pointer;
+  box-shadow: 0 0 0 2px #fff;
+}
+
+.nc-empty {
+  opacity: 0.7;
+  font-size: 0.9rem;
+}
+
+.nc-error {
+  color: #b91c1c;
+  font-size: 0.85rem;
+}
+
+html.dark .nc-marker {
+  box-shadow: 0 0 0 2px #111;
+}
+
+html.dark .nc-btn.danger {
+  color: #fca5a5;
+}

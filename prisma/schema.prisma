@@ -1,0 +1,28 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Comment {
+  id          String   @id
+  page        String
+  pageVersion String
+  threadId    String
+  parentId    String?
+  authorId    String
+  authorName  String
+  body        String
+  createdAt   DateTime @default(now())
+  resolved    Boolean  @default(false)
+  quote       String?
+  prefix      String?
+  suffix      String?
+  headingId   String?
+
+  @@index([page])
+  @@index([threadId])
+}
