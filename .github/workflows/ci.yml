@@ -32,6 +32,15 @@ jobs:
       - run: npm test
         env:
           DATABASE_URL: file:./prisma/ci.db
+      - name: Install Playwright Chrome
+        if: matrix.node == 22
+        run: npx playwright install --with-deps chrome
+      - name: Playwright e2e
+        if: matrix.node == 22
+        run: npm run test:e2e
+        env:
+          DATABASE_URL: file:./prisma/e2e.db
+          CI: true
       - run: npm run smoke
         env:
           DATABASE_URL: file:./prisma/ci.db

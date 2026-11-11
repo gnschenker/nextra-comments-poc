@@ -82,6 +82,40 @@ describe('comments API', () => {
     ])
   })
 
+  it('rejects replies on a resolved thread', async () => {
+    const root = await createComment('Ada Lovelace', {
+      page: '/deploy',
+      pageVersion: 'v1',
+      body: 'Spell out who writes the rollback step.'
+    })
+    const resolved = await PATCH(
+      request(`http://localhost/api/comments/${root.id}`, {
+        method: 'PATCH',
+        headers: { cookie: cookie('Ada Lovelace'), 'content-type': 'application/json' },
+        body: JSON.stringify({ resolved: true })
+      }),
+      { params: Promise.resolve({ id: root.id }) }
+    )
+    expect(resolved.status).toBe(200)
+
+    const reply = await createComment(
+      'Grace Hopper',
+      {
+        page: '/deploy',
+        pageVersion: 'v1',
+        parentId: root.id,
+        body: 'Too late to reply.'
+      },
+      409
+    )
+    expect(reply).toEqual({ error: 'Thread is resolved' })
+
+    const list = await GET(request('http://localhost/api/comments?page=/deploy'))
+    const comments = await list.json()
+    expect(comments).toHaveLength(1)
+    expect(comments[0].id).toBe(root.id)
+  })
+
   it('resolves and reopens a thread', async () => {
     const root = await createComment('Ada Lovelace', {
       page: '/incidents',
@@ -102,13 +136,58 @@ describe('comments API', () => {
     const reopened = await PATCH(
       request(`http://localhost/api/comments/${root.id}`, {
         method: 'PATCH',
-        headers: { cookie: cookie('Grace Hopper'), 'content-type': 'application/json' },
+        headers: { cookie: cookie('Ada Lovelace'), 'content-type': 'application/json' },
         body: JSON.stringify({ resolved: false })
       }),
       { params: Promise.resolve({ id: root.id }) }
     )
     expect(reopened.status).toBe(200)
     expect((await reopened.json()).resolved).toBe(false)
+  })
+
+  it('forbids anyone but the thread author from resolving or reopening', async () => {
+    const root = await createComment('Ada Lovelace', {
+      page: '/incidents',
+      pageVersion: 'v1',
+      body: 'Only Ada can resolve this.'
+    })
+    const deniedResolve = await PATCH(
+      request(`http://localhost/api/comments/${root.id}`, {
+        method: 'PATCH',
+        headers: { cookie: cookie('Grace Hopper'), 'content-type': 'application/json' },
+        body: JSON.stringify({ resolved: true })
+      }),
+      { params: Promise.resolve({ id: root.id }) }
+    )
+    expect(deniedResolve.status).toBe(403)
+    expect(await deniedResolve.json()).toEqual({ error: 'Forbidden' })
+
+    const asAuthor = await PATCH(
+      request(`http://localhost/api/comments/${root.id}`, {
+        method: 'PATCH',
+        headers: { cookie: cookie('Ada Lovelace'), 'content-type': 'application/json' },
+        body: JSON.stringify({ resolved: true })
+      }),
+      { params: Promise.resolve({ id: root.id }) }
+    )
+    expect(asAuthor.status).toBe(200)
+    expect((await asAuthor.json()).resolved).toBe(true)
+
+    const deniedReopen = await PATCH(
+      request(`http://localhost/api/comments/${root.id}`, {
+        method: 'PATCH',
+        headers: { cookie: cookie('Grace Hopper'), 'content-type': 'application/json' },
+        body: JSON.stringify({ resolved: false })
+      }),
+      { params: Promise.resolve({ id: root.id }) }
+    )
+    expect(deniedReopen.status).toBe(403)
+    expect(await deniedReopen.json()).toEqual({ error: 'Forbidden' })
+
+    const listed = await GET(request('http://localhost/api/comments?page=/incidents'))
+    const comments = await listed.json()
+    expect(comments).toHaveLength(1)
+    expect(comments[0].resolved).toBe(true)
   })
 
   it('lets an author delete their own comment', async () => {

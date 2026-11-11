@@ -23,7 +23,7 @@ Each stored row is one comment:
 - `parentId`: `null` on a root comment
 - `author`, `body`, `createdAt`, `resolved`
 
-`resolved` is stored on the thread root. Replies belong to that thread.
+`resolved` is stored on the thread root. Replies belong to that thread. Only the author of the root comment can resolve or reopen; the API returns 403 for anyone else. Replies on a resolved thread are rejected with 409.
 
 ### Anchoring algorithm
 
@@ -62,14 +62,15 @@ Use `npm ci`, not `npm install`. `next` is pinned to **15.5.29** (exact). See [S
 
 `npm run dev` runs a preflight (Node version and pinned Next version), `prisma migrate deploy`, then `next dev`. If Next 16 is present, the launcher passes `--webpack` because Nextra injects a webpack config and Next 16 defaults to Turbopack. Next 15.5.29 does not accept `--webpack`; webpack is already the default. If Next exits before it prints Ready, the wrapper exits 1 and prints the last log. Default `DATABASE_URL` is `file:./prisma/dev.db` from the repo root, so the database file is `prisma/dev.db`. Open [http://localhost:3000](http://localhost:3000).
 
-Pick a display name in the comments panel. Select article text to leave an inline comment.
+Pick a display name in the comments panel. Select article text and press **Comment** (tooltip: Ctrl/⌘+Alt+M) to leave an inline comment in a popup on the selection.
 
 ```bash
 npm test
+npm run test:e2e
 npm run smoke
 ```
 
-Tests cover quote re-attachment and the HTTP API, including a rejected delete of someone else's comment. `npm run smoke` starts the dev server and waits until `GET /` and `GET /api/comments?page=/deploy` return HTTP 200.
+Tests cover quote re-attachment and the HTTP API, including a rejected delete of someone else's comment, a rejected resolve/reopen by anyone but the thread author, and a rejected reply on a resolved thread. Playwright covers the composer and thread overlay (mouse, keyboard, 390px sheet) and axe-core on open/closed states in light and dark. `npm run smoke` starts the dev server and waits until `GET /` and `GET /api/comments?page=/deploy` return HTTP 200.
 
 ## Prisma 8 / Prisma ORM 7
 

@@ -13,3 +13,6 @@ prisma/*.db-journal
 test-*.db
 test-*.db-journal
 .DS_Store
+playwright-report/
+test-results/
+blob-report/

@@ -35,10 +35,12 @@ export class CommentService {
       const parent = await this.repo.getById(input.parentId)
       if (!parent) throw new CommentError('parent not found', 404)
       if (parent.page !== page) throw new CommentError('parent is on a different page', 400)
+      const root = await this.rootOf(parent)
+      if (root.resolved) throw new CommentError('Thread is resolved', 409)
       threadId = parent.threadId
       parentId = parent.id
       anchor = null
-      resolved = parent.resolved
+      resolved = false
     } else if (anchor && !anchor.quote.trim()) {
       throw new CommentError('anchor.quote is required', 400)
     }
@@ -56,10 +58,11 @@ export class CommentService {
     })
   }
 
-  async setResolved(id: string, resolved: boolean): Promise<Comment> {
+  async setResolved(user: User, id: string, resolved: boolean): Promise<Comment> {
     const comment = await this.repo.getById(id)
     if (!comment) throw new CommentError('comment not found', 404)
     const root = await this.rootOf(comment)
+    if (root.author.id !== user.id) throw new CommentError('Forbidden', 403)
     return this.repo.updateResolved(root.id, resolved)
   }
 

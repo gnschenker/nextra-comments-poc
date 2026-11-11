@@ -15,7 +15,7 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
     if (!body || typeof body !== 'object' || typeof (body as { resolved?: unknown }).resolved !== 'boolean') {
       throw new CommentError('resolved is required', 400)
     }
-    const comment = await commentService.setResolved(id, (body as { resolved: boolean }).resolved)
+    const comment = await commentService.setResolved(user, id, (body as { resolved: boolean }).resolved)
     return json(serializeComment(comment))
   } catch (error) {
     return errorResponse(error)
