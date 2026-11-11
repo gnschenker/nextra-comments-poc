@@ -8,6 +8,7 @@ assertSupportedNode()
 const port = process.env.PORT ?? '3015'
 process.env.PORT = port
 process.env.DATABASE_URL ??= 'file:./prisma/dev.db'
+const origin = `http://127.0.0.1:${port}`
 
 const child = spawn(process.execPath, ['scripts/dev.mjs'], {
   stdio: ['ignore', 'pipe', 'pipe'],
@@ -39,25 +40,59 @@ function stop() {
   }
 }
 
+function fail(message) {
+  console.error(`[nextra-comments] smoke: ${message}`)
+  if (log.trim()) console.error(log.slice(-4000))
+  stop()
+  process.exit(1)
+}
+
+async function get(path) {
+  const response = await fetch(`${origin}${path}`)
+  const buffer = Buffer.from(await response.arrayBuffer())
+  console.error(`[nextra-comments] smoke: GET ${path} -> ${response.status}`)
+  return { response, buffer }
+}
+
+async function runChecks() {
+  const home = await get('/')
+  if (!home.response.ok) fail(`GET / expected 200, got ${home.response.status}`)
+
+  const comments = await get('/api/comments?page=/deploy')
+  if (!comments.response.ok) {
+    fail(`GET /api/comments?page=/deploy expected 200, got ${comments.response.status}`)
+  }
+
+  const favicon = await get('/favicon.ico')
+  if (favicon.response.status !== 200) {
+    fail(`GET /favicon.ico expected 200, got ${favicon.response.status}`)
+  }
+  const faviconType = favicon.response.headers.get('content-type') ?? ''
+  const faviconText = favicon.buffer.subarray(0, 32).toString('utf8')
+  if (faviconType.includes('text/html') || faviconText.includes('<!DOCTYPE')) {
+    fail('GET /favicon.ico returned HTML from the MDX catch-all')
+  }
+
+  const missing = await get('/this-page-does-not-exist')
+  if (missing.response.status !== 404) {
+    fail(`GET /this-page-does-not-exist expected 404, got ${missing.response.status}`)
+  }
+
+  await sleep(400)
+  if (log.includes('Error while loading')) {
+    fail('server log contains "Error while loading"')
+  }
+}
+
 const deadline = Date.now() + 90_000
 while (Date.now() < deadline) {
   if (exited) {
-    console.error(
-      `[nextra-comments] smoke: dev exited before HTTP 200 (code ${exitCode}, signal ${exitSignal})`
-    )
-    process.exit(1)
+    fail(`dev exited before HTTP 200 (code ${exitCode}, signal ${exitSignal})`)
   }
   try {
-    const response = await fetch(`http://127.0.0.1:${port}/`)
+    const response = await fetch(`${origin}/`)
     if (response.ok) {
-      const comments = await fetch(`http://127.0.0.1:${port}/api/comments?page=/deploy`)
-      console.error(
-        `[nextra-comments] smoke: GET / -> ${response.status}, GET /api/comments?page=/deploy -> ${comments.status}`
-      )
-      if (!comments.ok) {
-        stop()
-        process.exit(1)
-      }
+      await runChecks()
       stop()
       await sleep(500)
       process.exit(0)
@@ -68,7 +103,4 @@ while (Date.now() < deadline) {
   await sleep(500)
 }
 
-console.error('[nextra-comments] smoke: timed out waiting for HTTP 200')
-if (log.trim()) console.error(log.slice(-4000))
-stop()
-process.exit(1)
+fail('timed out waiting for HTTP 200')
