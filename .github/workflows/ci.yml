@@ -18,7 +18,15 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: npm
-      - run: npm ci
+      - name: npm ci (fail on install-scripts warning)
+        run: |
+          set -o pipefail
+          npm ci 2>&1 | tee npm-ci.log
+          if grep -F 'install-scripts' npm-ci.log; then
+            echo 'npm ci printed an install-scripts warning'
+            exit 1
+          fi
+      - run: npm audit --audit-level=high
       - run: npm exec --no -- prisma generate
       - run: node -e "const v=require('next/package.json').version; if (v !== '15.5.29') { console.error('expected next@15.5.29, got', v); process.exit(1) }"
       - run: npm test
@@ -36,7 +44,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 26
-      - run: npm install
+      - name: npm install (fail on install-scripts warning)
+        run: |
+          set -o pipefail
+          npm install 2>&1 | tee npm-install.log
+          if grep -F 'install-scripts' npm-install.log; then
+            echo 'npm install printed an install-scripts warning'
+            exit 1
+          fi
+      - run: npm audit --audit-level=high
       - run: node -e "const v=require('next/package.json').version; if (v !== '15.5.29') { console.error('expected next@15.5.29, got', v); process.exit(1) }"
       - run: npm run smoke
         env:

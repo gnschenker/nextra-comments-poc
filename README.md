@@ -58,7 +58,7 @@ npm ci
 npm run dev
 ```
 
-Use `npm ci`, not `npm install`. `next` is pinned to **15.5.29** (exact). Nextra 4.5.1's peer range is `next: >=14`, which includes Next 16, and `npx next` with no local bind installs `next@latest` (16 today). The lockfile and `overrides` keep 15.5.29. `npm run dev` runs the local `node_modules/next` binary, never `npx next`.
+Use `npm ci`, not `npm install`. `next` is pinned to **15.5.29** (exact). See [SECURITY-NOTES.md](SECURITY-NOTES.md) for audit overrides and npm 11 `allowScripts`. Nextra 4.5.1's peer range is `next: >=14`, which includes Next 16, and `npx next` with no local bind installs `next@latest` (16 today). The lockfile and `overrides` keep 15.5.29. `npm run dev` runs the local `node_modules/next` binary, never `npx next`.
 
 `npm run dev` runs a preflight (Node version and pinned Next version), `prisma migrate deploy`, then `next dev`. If Next 16 is present, the launcher passes `--webpack` because Nextra injects a webpack config and Next 16 defaults to Turbopack. Next 15.5.29 does not accept `--webpack`; webpack is already the default. If Next exits before it prints Ready, the wrapper exits 1 and prints the last log. Default `DATABASE_URL` is `file:./prisma/dev.db` from the repo root, so the database file is `prisma/dev.db`. Open [http://localhost:3000](http://localhost:3000).
 
