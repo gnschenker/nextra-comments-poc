@@ -1,0 +1,55 @@
+{
+  "name": "nextra-comments-poc",
+  "private": true,
+  "scripts": {
+    "preflight": "node scripts/preflight.mjs",
+    "dev": "node scripts/dev.mjs",
+    "build": "node scripts/preflight.mjs && DATABASE_URL=${DATABASE_URL:-file:./prisma/dev.db} prisma migrate deploy && DATABASE_URL=${DATABASE_URL:-file:./prisma/dev.db} node scripts/run-next.mjs build",
+    "start": "node scripts/run-next.mjs start",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "postinstall": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "overrides": {
+    "next": "15.5.29",
+    "postcss": "8.5.32",
+    "sharp": "0.35.5",
+    "katex": "0.18.2",
+    "minimatch": "11.0.7"
+  },
+  "dependencies": {
+    "@prisma/adapter-better-sqlite3": "7.10.1",
+    "@prisma/client": "7.10.1",
+    "better-sqlite3": "12.11.1",
+    "dotenv": "^16.6.1",
+    "next": "15.5.29",
+    "nextra": "4.5.1",
+    "nextra-theme-docs": "4.5.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.10.2",
+    "@playwright/test": "1.56.1",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "axe-core": "4.10.3",
+    "prisma": "7.10.1",
+    "typescript": "^5.8.2",
+    "vitest": "4.1.12"
+  },
+  "allowScripts": {
+    "@prisma/engines@7.10.1": true,
+    "better-sqlite3@12.11.1": true,
+    "prisma@7.10.1": true
+  }
+}

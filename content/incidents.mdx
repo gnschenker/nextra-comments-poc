@@ -1,0 +1,17 @@
+# Incidents
+
+Page the platform on-call for customer-facing errors, data-loss risk, or a deploy that cannot be rolled back.
+
+## Before you page
+
+Please review the runbook before paging. Check the status dashboard, the last deploy thread, and whether a rollback is already running.
+
+## During an incident
+
+Keep one written timeline in the incident channel. Note when you started the canary, when you rolled back, and who you paged.
+
+## After the incident
+
+Later, review the runbook after the incident. Add the missing step on the same day while the details are still sharp.
+
+The follow-up pull request should name the user-visible failure, the detection gap, and the change that prevents a repeat. Link it from the incident ticket.

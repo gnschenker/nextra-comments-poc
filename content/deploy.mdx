@@ -1,0 +1,21 @@
+# Deployments
+
+Production deploys are rolling canaries. Staging deploys are full replacements. Both paths share one image tag.
+
+## Staging
+
+In staging: Wait for the health check to return 200 before routing traffic. Record the time in the deploy thread so the next person can see how long the check took.
+
+Staging may run unsigned images from the `next` tag. Do not promote a staging-only image to production.
+
+## Production
+
+In production: Wait for the health check to return 200 before routing traffic. Record the time in the deploy thread. If the check is slower than five minutes, abort and file an incident.
+
+Production requires two reviewers. The second reviewer must be outside the authoring team.
+
+Never roll forward without a written rollback step. Confirm it in the thread before you approve the canary.
+
+## Rollbacks
+
+A rollback is a deploy of the previous known-good tag. Do not "fix forward" on a user-facing outage unless the rollback image is missing.
