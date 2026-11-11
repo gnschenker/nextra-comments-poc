@@ -12,6 +12,7 @@ import {
   useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState
 } from 'react'
@@ -219,29 +220,27 @@ export function Comments() {
   const restoreTargetRef = useRef<HTMLElement | null>(null)
   const closePop = useCallback((restore = true) => {
     const prev = activeRef.current
+    document.querySelectorAll<HTMLElement>('[inert]').forEach((el) => el.removeAttribute('inert'))
     restoreTargetRef.current = null
     if (restore && prev) {
-      if (prev.kind === 'thread') {
-        restoreTargetRef.current = markerMap.current.get(prev.threadId) ?? null
-      } else {
-        const trigger = returnToRef.current
-        restoreTargetRef.current =
-          trigger && document.contains(trigger) && !trigger.hidden ? trigger : null
-      }
+      restoreTargetRef.current =
+        prev.kind === 'thread'
+          ? (markerMap.current.get(prev.threadId) ?? null)
+          : returnToRef.current && document.contains(returnToRef.current) && !returnToRef.current.hidden
+            ? returnToRef.current
+            : null
+      restoreTargetRef.current?.focus({ preventScroll: true })
     }
     setPendingHighlight(null)
     setActive(null)
   }, [])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (active) return
     const target = restoreTargetRef.current
-    if (!target) return
-    const id = window.setTimeout(() => {
-      if (document.contains(target) && !target.hidden) target.focus({ preventScroll: true })
-      restoreTargetRef.current = null
-    }, 0)
-    return () => window.clearTimeout(id)
+    if (target && document.contains(target) && !target.hidden) {
+      target.focus({ preventScroll: true })
+    }
   }, [active])
 
   const openComposer = useCallback(
